@@ -1,0 +1,1 @@
+face_detection_framerate  haar cascade: 0.100 sec per frame
