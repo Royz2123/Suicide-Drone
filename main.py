@@ -1,5 +1,8 @@
+import time
+
 import detection.recognizer as recognizer
 import prediction.tester as tester
+
 
 
 FACE_XML = "./detection/test_cascades/haarcascade_frontalface_alt.xml"
@@ -11,7 +14,8 @@ def detect():
 
 def predict():
     tester_obj = tester.Tester()
-    tester_obj.generate_test_file()
+    # tester_obj.generate_test_file()
+    tester_obj.check_test_file()
 
 
 if __name__ == "__main__":
