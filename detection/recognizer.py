@@ -4,7 +4,6 @@ import os
 
 class DroneRecognizer(object):
     DEFAUlT_XML_PATH = "./detection/cascades/haarcascade_drones.xml"
-    DEFAUlT_XML_PATH = "./detection/cascades/haarcascade_drones.xml"
 
     def __init__(self, xml_file=DEFAUlT_XML_PATH, trained=True):
         self._drone_cascade = None

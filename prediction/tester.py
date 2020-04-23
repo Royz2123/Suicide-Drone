@@ -1,41 +1,81 @@
 import matplotlib
+
 matplotlib.use("Qt4Agg")
 
 import matplotlib.pyplot as plt
 import random
 import numpy as np
 import json
-
+import os
 import matplotlib.animation as animation
+import time
+
+import prediction.kalman as kalman
 
 plt.style.use('dark_background')
 
+
 class Tester(object):
-    TEST_FILE = "./prediction/test/tests.json"
-    ANSWER_FILE = "./prediction/test/answers.json"
-    GUESS_FILE = "./prediction/test/guess.json"
+    TEST_FILE = "./prediction/tests/%s/tests.json"
+    ANSWER_FILE = "./prediction/tests/%s/answers.json"
+    VIDEO_FILE = './prediction/tests/%s/trajectory.mp4'
+
+    BASE_FOLDER = "./prediction/tests/%s/"
+    PREDICTION_FOLDER = "./prediction/tests/%s/predictions/"
 
     TRAJ_SECONDS = 2
     SAMPLE_SECONDS = 1.5
 
     SAMPLES = 5
-    CASES = 10
+    CASES = 1
 
     DEFAULT_SINUSES = 10
+
+    PREDICTORS = [
+        kalman.KalmanPredictor,
+    ]
 
     (
         SECRET,
         PLOT,
         ANIMATE,
         SAVE,
-    )=range(4)
+    ) = range(4)
 
-    def __init__(self, mode=ANIMATE):
+    def __init__(self, mode=ANIMATE, test_name="default_test"):
         self._coefficients = None
         self._mode = mode
 
         self._frequencies = None
         self._phases = None
+
+        self._test_name = test_name
+        self._base_folder = Tester.BASE_FOLDER % self._test_name
+        self._pred_folder = Tester.PREDICTION_FOLDER % self._test_name
+        self._test_file = Tester.TEST_FILE % self._test_name
+        self._answer_file = Tester.ANSWER_FILE % self._test_name
+        self._video_file = Tester.VIDEO_FILE % self._test_name
+
+        try:
+            os.mkdir(self._base_folder)
+            os.mkdir(self._pred_folder)
+        except Exception as e:
+            print("Test already exists, destroying" + str(e))
+
+    def test_all_predictors(self):
+        self.generate_test_file()
+
+        pred_files = []
+        for index, predictor_class in enumerate(Tester.PREDICTORS):
+            pred_obj = predictor_class()
+            pred_file = "%spreciction_%s.json" % (self._pred_folder, str(index))
+            pred_obj.predict(
+                input_file=self._test_file,
+                output_file=pred_file
+            )
+            pred_files.append(pred_file)
+
+        self.check_prediction_folder()
 
     def generate_test_file(self, cases=CASES):
         tests = {}
@@ -43,8 +83,8 @@ class Tester(object):
         for case_num in range(cases):
             tests[case_num], answers[case_num] = self.get_trajectory()
 
-        json.dump(tests, open(Tester.TEST_FILE, "w"))
-        json.dump(answers, open(Tester.ANSWER_FILE, "w"))
+        json.dump(tests, open(self._test_file, "w"))
+        json.dump(answers, open(self._answer_file, "w"))
 
     def generate_coefficients(self, degree):
         roots = [random.uniform(0, Tester.SAMPLE_SECONDS) for _ in range(degree)]
@@ -69,10 +109,44 @@ class Tester(object):
         # Serious Voodoo crap, should do more sin shit
         return np.sin(self.generate_polynomial()(x) * 1.5)
 
-    def check_test_file(self):
-        guess = json.load(open(Tester.GUESS_FILE, "r"))
-        answers = json.load(open(Tester.ANSWER_FILE, "r"))
-        test = json.load(open(Tester.TEST_FILE, "r"))
+    def check_prediction_folder(self):
+        answers = json.load(open(self._answer_file, "r"))
+        test = json.load(open(self._test_file, "r"))
+
+        pred_fnames = [self._pred_folder + fname for fname in os.listdir(self._pred_folder)]
+        preds = [json.load(open(pred_file, "r")) for pred_file in pred_fnames]
+
+        for test_num in range(Tester.CASES):
+            curr_data = [data[str(test_num)] for data in preds]
+
+            for test_case in preds[0].keys():
+                test_data = test[test_case]
+                answer_data = answers[test_case]
+
+                if self._mode >= Tester.PLOT:
+                    plt.plot(answer_data["x"], answer_data["y"])
+                    plt.scatter(test_data["x"], test_data["y"])
+
+                    for data in curr_data:
+                        plt.plot(
+                            data["x"],
+                            data["y"],
+                            '-.', linewidth=1
+                        )
+                    plt.show()
+
+                if self._mode >= Tester.ANIMATE:
+                    self.animate(
+                        answer_data["t"],
+                        answer_data["x"], answer_data["y"],
+                        test_data["x"], test_data["y"],
+                        curr_data
+                    )
+
+    def check_prediction_file(self, prediction_file):
+        guess = json.load(open(prediction_file, "r"))
+        answers = json.load(open(self._answer_file, "r"))
+        test = json.load(open(self._test_file, "r"))
 
         for test_case in guess.keys():
             guess_data = guess[test_case]
@@ -82,6 +156,7 @@ class Tester(object):
             if self._mode >= Tester.PLOT:
                 plt.plot(answer_data["x"], answer_data["y"])
                 plt.scatter(test_data["x"], test_data["y"])
+
                 plt.plot(guess_data["x"], guess_data["y"], '-.', linewidth=1)
                 plt.show()
 
@@ -90,12 +165,12 @@ class Tester(object):
                     answer_data["t"],
                     answer_data["x"], answer_data["y"],
                     test_data["x"], test_data["y"],
-                    guess_data["x"], guess_data["y"]
+                    [guess_data]
                 )
 
     def get_trajectory(self):
         t = np.linspace(0, Tester.TRAJ_SECONDS, 10000)
-        st = np.random.uniform(0, Tester.SAMPLE_SECONDS, Tester.SAMPLES)
+        st = np.sort(np.random.uniform(0, Tester.SAMPLE_SECONDS, Tester.SAMPLES))
 
         self.generate_sinuses()
         x = self.secret_function(t)
@@ -118,7 +193,7 @@ class Tester(object):
 
         return test, answer
 
-    def animate(self, t, x, y, sx, sy, sx_guess=[], sy_guess=[]):
+    def animate(self, t, x, y, sx, sy, guesses=[]):
         fig = plt.figure()
         ax = plt.axes(xlim=(-1, 1), ylim=(-1, 1))
         line, = ax.plot([], [], lw=6)
@@ -126,7 +201,8 @@ class Tester(object):
         plt.plot(x, y, '--', linewidth=1)
         plt.scatter(sx, sy)
 
-        plt.plot(sx_guess, sy_guess, '-.', linewidth=1)
+        for pred in guesses:
+            plt.plot(pred["x"], pred["y"], '-.', linewidth=1)
 
         # initialization function
         def init():
@@ -167,4 +243,4 @@ class Tester(object):
             # save the animation as mp4 video file
             plt.rcParams['animation.ffmpeg_path'] = 'C:/Users/t8637523/Desktop/Rare Programs/ffmpeg/bin/ffmpeg.exe'
             mywriter = animation.FFMpegWriter(fps=60)
-            anim.save('./prediction/videos/trajectory.mp4', writer=mywriter)
+            anim.save(self._video_file, writer=mywriter)
