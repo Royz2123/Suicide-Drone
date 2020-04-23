@@ -15,7 +15,7 @@ def detect():
 
 
 def predict():
-    tester_obj = tester.Tester(test_name="test1")
+    tester_obj = tester.Tester(test_name="test_abel")
     tester_obj.test_all_predictors()
 
     # OLD FORMAT
