@@ -26,7 +26,7 @@ class Tester(object):
     TRAJ_SECONDS = 2
     SAMPLE_SECONDS = 1.5
 
-    SAMPLES = 5
+    SAMPLES = 15
     CASES = 1
 
     DEFAULT_SINUSES = 10

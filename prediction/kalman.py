@@ -43,7 +43,6 @@ class KalmanPredictor(object):
         return {'x': list(out_states[0, :]), 'y': list(out_states[1, :]),
                 't': list(np.arange(t[-1] + out_dt, t[-1] + (out_N + 1)*out_dt, out_dt))}
 
-
     def set_dt(self, f, dt):
         f.F = np.array([[1, 0, dt, 0],
                         [0, 1, 0, dt],
