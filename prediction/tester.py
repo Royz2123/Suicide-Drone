@@ -24,8 +24,9 @@ class Tester(object):
     BASE_FOLDER = "./prediction/tests/%s/"
     PREDICTION_FOLDER = "./prediction/tests/%s/predictions/"
 
-    TRAJ_SECONDS = 2
+    TRAJ_SECONDS = 3
     SAMPLE_SECONDS = 1.5
+    PRED_SECONDS = 1
 
     SAMPLES = 15
     CASES = 1
@@ -73,7 +74,8 @@ class Tester(object):
             pred_file = "%spreciction_%s.json" % (self._pred_folder, str(index))
             pred_obj.predict(
                 input_file=self._test_file,
-                output_file=pred_file
+                output_file=pred_file,
+                pred_sec=Tester.PRED_SECONDS
             )
             pred_files.append(pred_file)
 
@@ -159,7 +161,7 @@ class Tester(object):
                 plt.plot(answer_data["x"], answer_data["y"])
                 plt.scatter(test_data["x"], test_data["y"])
 
-                plt.plot(guess_data["x"], guess_data["y"], '-.', linewidth=1)
+                plt.plot(guess_data["x"], guess_data["y"], '-.', linewidth=3)
                 plt.show()
 
             if self._mode >= Tester.ANIMATE:
@@ -204,7 +206,7 @@ class Tester(object):
         plt.scatter(sx, sy)
 
         for pred in guesses:
-            plt.plot(pred["x"], pred["y"], '-.', linewidth=1)
+            plt.plot(pred["x"], pred["y"], '-.', linewidth=2)
 
         # initialization function
         def init():

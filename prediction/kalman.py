@@ -52,7 +52,7 @@ class KalmanPredictor(object):
     def load(self):
         return json.load(open('tests.json'))
 
-    def predict(self, input_file, output_file):
+    def predict(self, input_file, output_file, pred_sec=0.5):
         tests = json.load(open(input_file))
 
         out = dict()
