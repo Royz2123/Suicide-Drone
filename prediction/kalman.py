@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
-
-
 from filterpy.kalman import KalmanFilter
 import numpy as np
 import matplotlib.pyplot as plt

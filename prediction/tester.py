@@ -11,6 +11,7 @@ import matplotlib.animation as animation
 import time
 
 import prediction.kalman as kalman
+import prediction.poly as poly
 
 plt.style.use('dark_background')
 
@@ -33,6 +34,7 @@ class Tester(object):
 
     PREDICTORS = [
         kalman.KalmanPredictor,
+        poly.PolyPredictor,
     ]
 
     (
