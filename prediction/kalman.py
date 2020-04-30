@@ -13,8 +13,8 @@ class KalmanPredictor(object):
         f = KalmanFilter (dim_x=6, dim_z=6)
         f.H = np.eye(6)
         #f.Q = Q_discrete_white_noise(dim=4, dt=0.1, var=0.0001)
-        f.P *= 0.00001
-        f.R = 0.00001 * np.eye(6)
+        f.P *= 0.0001
+        f.R = 0.0001 * np.eye(6)
         t, x, y = test['t'], test['x'], test['y']
         x_ind = {p: index for index, p in enumerate(x)}
         y_ind = {p: index for index, p in enumerate(y)}
