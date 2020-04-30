@@ -10,14 +10,11 @@ import json
 
 class KalmanPredictor(object):
     def generate(self, test):
-        f = KalmanFilter (dim_x=4, dim_z=4)
-        f.H = np.eye(4)
+        f = KalmanFilter (dim_x=6, dim_z=6)
+        f.H = np.eye(6)
         #f.Q = Q_discrete_white_noise(dim=4, dt=0.1, var=0.0001)
-        f.P *= 0.0001
-        f.R = np.array([[0.0001, 0, 0, 0],
-                        [0, 0.0001, 0, 0],
-                        [0, 0, 0.0001, 0],
-                        [0, 0, 0, 0.0001]])
+        f.P *= 0.00001
+        f.R = 0.00001 * np.eye(6)
         t, x, y = test['t'], test['x'], test['y']
         x_ind = {p: index for index, p in enumerate(x)}
         y_ind = {p: index for index, p in enumerate(y)}
@@ -29,12 +26,16 @@ class KalmanPredictor(object):
         dy = (y[1:] - y[:-1]) / dts
         dx = np.concatenate((np.array([0]), dx))
         dy = np.concatenate((np.array([0]), dy))
-        states = np.vstack((x, y, dx, dy))
+        ddx = (dx[1:] - dx[:-1]) / dts
+        ddy = (dy[1:] - dy[:-1]) / dts
+        ddx = np.concatenate((np.array([0]), ddx))
+        ddy = np.concatenate((np.array([0]), ddy))
+        states = np.vstack((x, y, dx, dy, ddx, ddy))
 
         f.x = states[:, 0]
 
-        out_dt = 0.1
-        out_N = 5
+        out_dt = 0.01
+        out_N = 50
         out_states = []
         for i in range(1, states.shape[1]):
             self.set_dt(f, dts[i-1])
@@ -51,10 +52,13 @@ class KalmanPredictor(object):
                 't': list(np.arange(t[-1] + out_dt, t[-1] + (out_N + 1)*out_dt, out_dt))}
 
     def set_dt(self, f, dt):
-        f.F = np.array([[1, 0, dt, 0],
-                        [0, 1, 0, dt],
-                        [0, 0, 1, 0],
-                        [0, 0, 0, 1]])
+        dt2 = dt ** 2
+        f.F = np.array([[1, 0, dt, 0, 0.5*dt2, 0],
+                        [0, 1, 0, dt, 0, 0.5*dt2],
+                        [0, 0, 1, 0, dt, 0],
+                        [0, 0, 0, 1, 0, dt],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1]])
 
     def set_uncertainty(self, f, sigma):
         f.P *= sigma
