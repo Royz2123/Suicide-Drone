@@ -83,8 +83,14 @@ class KalmanPredictor(object):
 
         json.dump(out, open(output_file, 'w'))
 
+class Kalman1(KalmanPredictor):
+    def __init__(self):
+        super().__init__(1)
 
+class Kalman2(KalmanPredictor):
+    def __init__(self):
+        super().__init__(2)
 
-
-
-
+class Kalman3(KalmanPredictor):
+    def __init__(self):
+        super().__init__(3)
