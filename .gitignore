@@ -2,7 +2,7 @@
 .idea/*
 
 train_images/
-test_images/
+test_images/drones/other/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
