@@ -7,14 +7,18 @@ import matplotlib.pyplot as plt
 from filterpy.common import Q_discrete_white_noise
 import json
 
-
 class KalmanPredictor(object):
+    def __init__(self, deg=3):
+        self.deg = deg
+        self.dim = 2*(deg+1)
+        self.inverse_factorials = [1/np.math.factorial(i) for i in range(1, deg + 1)]
+
     def generate(self, test):
-        f = KalmanFilter (dim_x=6, dim_z=6)
-        f.H = np.eye(6)
+        f = KalmanFilter (dim_x=self.dim, dim_z=self.dim)
+        f.H = np.eye(self.dim)
         #f.Q = Q_discrete_white_noise(dim=4, dt=0.1, var=0.0001)
         f.P *= 0.0001
-        f.R = 0.0001 * np.eye(6)
+        f.R = 0.0001 * np.eye(self.dim)
         t, x, y = test['t'], test['x'], test['y']
         x_ind = {p: index for index, p in enumerate(x)}
         y_ind = {p: index for index, p in enumerate(y)}
@@ -22,15 +26,17 @@ class KalmanPredictor(object):
         t = sorted(t)
         t, x, y = np.array(t), np.array(x), np.array(y)
         dts = np.diff(t)
-        dx = (x[1:] - x[:-1]) / dts
-        dy = (y[1:] - y[:-1]) / dts
-        dx = np.concatenate((np.array([0]), dx))
-        dy = np.concatenate((np.array([0]), dy))
-        ddx = (dx[1:] - dx[:-1]) / dts
-        ddy = (dy[1:] - dy[:-1]) / dts
-        ddx = np.concatenate((np.array([0]), ddx))
-        ddy = np.concatenate((np.array([0]), ddy))
-        states = np.vstack((x, y, dx, dy, ddx, ddy))
+        derivs = [x, y]
+        dx = x
+        dy = y
+        for i in range(self.deg):
+            dx = (dx[1:] - dx[:-1]) / dts
+            dy = (dy[1:] - dy[:-1]) / dts
+            dx = np.concatenate((np.array([0]), dx))
+            dy = np.concatenate((np.array([0]), dy))
+            derivs.append(dx)
+            derivs.append(dy)
+        states = np.vstack(derivs)
 
         f.x = states[:, 0]
 
@@ -52,13 +58,14 @@ class KalmanPredictor(object):
                 't': list(np.arange(t[-1] + out_dt, t[-1] + (out_N + 1)*out_dt, out_dt))}
 
     def set_dt(self, f, dt):
+        dt_powers = [dt ** i for i in range(1, self.deg + 1)]
         dt2 = dt ** 2
-        f.F = np.array([[1, 0, dt, 0, 0.5*dt2, 0],
-                        [0, 1, 0, dt, 0, 0.5*dt2],
-                        [0, 0, 1, 0, dt, 0],
-                        [0, 0, 0, 1, 0, dt],
-                        [0, 0, 0, 0, 1, 0],
-                        [0, 0, 0, 0, 0, 1]])
+        F = np.eye(self.dim)
+        for i in range(self.deg):
+            for j in range(self.deg - i):
+                F[2*i:2*(i+1),2*(j+1) + 2*i:2*(j+2) + 2*i] = \
+                    self.inverse_factorials[j]*dt_powers[j]*np.eye(2)
+        f.F = F
 
     def set_uncertainty(self, f, sigma):
         f.P *= sigma
@@ -76,8 +83,14 @@ class KalmanPredictor(object):
 
         json.dump(out, open(output_file, 'w'))
 
+class Kalman1(KalmanPredictor):
+    def __init__(self):
+        super().__init__(1)
 
+class Kalman2(KalmanPredictor):
+    def __init__(self):
+        super().__init__(2)
 
-
-
-
+class Kalman3(KalmanPredictor):
+    def __init__(self):
+        super().__init__(3)

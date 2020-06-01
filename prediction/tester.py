@@ -34,7 +34,9 @@ class Tester(object):
     DEFAULT_SINUSES = 10
 
     PREDICTORS = [
-        kalman.KalmanPredictor,
+        kalman.Kalman1,
+        kalman.Kalman2,
+        kalman.Kalman3,
         poly.PolyPredictor,
     ]
 
