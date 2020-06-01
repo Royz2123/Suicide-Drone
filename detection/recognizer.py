@@ -38,7 +38,7 @@ class DroneRecognizer():
             tock = time.time()
 
             times.append(tock - tick)
-            print(f"Detection time:\t\t{times[-1]}")
+            print("Detection time:\t\t", str(times[-1]))
 
             for (x, y, w, h) in drones:
                 img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -54,7 +54,7 @@ class DroneRecognizer():
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
 
-        print(f"Average detection time:\t{np.mean(times)}")
+        print("Average detection time:\t", str(np.mean(times)))
 
 
 
