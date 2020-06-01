@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 
-class DroneRecognizer():
+class DroneRecognizer:
     DEFAUlT_XML_PATH = "./detection/cascades/drone_cascade_beta.xml"
 
     def __init__(self, xml_file=DEFAUlT_XML_PATH, trained=True):
