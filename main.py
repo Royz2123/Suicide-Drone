@@ -1,12 +1,19 @@
 import time
 
 import detection.recognizer as recognizer
-# import prediction.tester as tester
+import prediction.tester as tester
+
+import detection.dataset_tools as dataset_tools
 
 
 FACE_XML = "./detection/test_cascades/haarcascade_frontalface_alt.xml"
 WATCH_XML = "./train_images/watches/classifier/cascade.xml"
 
+
+def create_dataset():
+    dataset = dataset_tools.DroneDataset()
+    # dataset.create_edge_dataset()
+    dataset.dilute_directory()
 
 def detect():
     recog_obj = recognizer.DroneRecognizer()
@@ -24,4 +31,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    detect()
+    create_dataset()

@@ -20,7 +20,7 @@ class DroneRecognizer:
     def train(self, im_path="./train_images/drones"):
         pass
 
-    def test(self, im_path="./test_images/drones/test_images/", viz=True):
+    def test(self, im_path="./test_images/drones/images/input/", viz=True):
         img_paths = [im_path + path for path in os.listdir(im_path)][:10]
         print("TESTING ON:\t\t", img_paths)
 
@@ -52,13 +52,13 @@ class DroneRecognizer:
 
             times.append(tock - tick)
             print("Detection time:\t\t", str(times[-1]))
-            if len(drones)>0:
+            if len(drones) > 0:
                 best_drone = max(drones, key=lambda drone: drone[1])
                 ((x, y, w, h), confidence) = best_drone
                 last_size = (w, h)
                 img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
             else:
-                last_size=None
+                last_size = None
             if viz:
                 scale_percent = 30  # percent of original size
                 width = int(img.shape[1] * scale_percent / 100)
