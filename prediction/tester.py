@@ -34,10 +34,8 @@ class Tester(object):
     DEFAULT_SINUSES = 10
 
     PREDICTORS = [
-        kalman.Kalman1,
         kalman.Kalman2,
-        kalman.Kalman3,
-        poly.PolyPredictor,
+        # poly.polyPredictor
     ]
 
     (
@@ -163,8 +161,9 @@ class Tester(object):
                 plt.plot(answer_data["x"], answer_data["y"])
                 plt.scatter(test_data["x"], test_data["y"])
 
-                plt.plot(guess_data["x"], guess_data["y"], '-.', linewidth=3)
+                plt.plot(guess_data["x"], guess_data["y"], '-.', linewidth=3, label=test_case)
                 plt.show()
+                plt.legend()
 
             if self._mode >= Tester.ANIMATE:
                 self.animate(
@@ -174,17 +173,26 @@ class Tester(object):
                     [guess_data]
                 )
 
-    def get_trajectory(self):
-        t = np.linspace(0, Tester.TRAJ_SECONDS, 10000)
+    def get_trajectory(self, method='sin'):
+        N = 10000
+        speed = 10
+        sigma_omega = np.pi / 8
+        dt = Tester.TRAJ_SECONDS / N
+        t = np.linspace(0, Tester.TRAJ_SECONDS, N)
         st = np.sort(np.random.uniform(0, Tester.SAMPLE_SECONDS, Tester.SAMPLES))
+        if method == 'sin':
+            self.generate_sinuses()
+            x = self.secret_function(t)
+            sx = self.secret_function(st)
 
-        self.generate_sinuses()
-        x = self.secret_function(t)
-        sx = self.secret_function(st)
-
-        self.generate_sinuses()
-        y = self.secret_function(t)
-        sy = self.secret_function(st)
+            self.generate_sinuses()
+            y = self.secret_function(t)
+            sy = self.secret_function(st)
+        elif method == 'randomwalk':
+            x = np.zeros(N)
+            theta = 0
+            for i in range(len):
+                pass
 
         answer = {"t": t.tolist(), "x": x.tolist(), "y": y.tolist()}
         test = {"t": st.tolist(), "x": sx.tolist(), "y": sy.tolist()}
@@ -207,8 +215,9 @@ class Tester(object):
         plt.plot(x, y, '--', linewidth=1)
         plt.scatter(sx, sy)
 
-        for pred in guesses:
-            plt.plot(pred["x"], pred["y"], '-.', linewidth=2)
+        for i, pred in enumerate(guesses):
+            plt.plot(pred["x"], pred["y"], '-.', linewidth=2, label=Tester.PREDICTORS[i].__name__)
+        plt.legend(prop={'size': 10})
 
         # initialization function
         def init():
