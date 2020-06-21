@@ -187,6 +187,7 @@ class DroneRecognizer:
                     # images_visualized.append(img)
                     self.show_img(img)
 
+
         if viz:
             self.create_video_from_images(images_visualized, im_path + "output.avi")
 
