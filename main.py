@@ -1,7 +1,7 @@
 import time
 
 import detection.recognizer as recognizer
-import prediction.tester as tester
+# import prediction.tester as tester
 
 import detection.dataset_tools as dataset_tools
 
@@ -17,7 +17,7 @@ def create_dataset():
 
 def detect():
     recog_obj = recognizer.DroneRecognizer()
-    recog_obj.test(edge=True)
+    recog_obj.test()
 
 
 def predict():

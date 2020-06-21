@@ -35,7 +35,7 @@ class DroneRecognizer:
 
         if path.endswith(".jpg") or path.endswith(".png") or path.endswith(".tiff"):
             img = cv2.imread(path, 0)
-        elif path.endswith(".MOV") or path.endswith(".MP4") or path.endswith(".avi"):
+        elif path.endswith(".MOV") or path.endswith(".mp4") or path.endswith(".avi"):
             if self.vidcap is None:
                 self.vidcap = cv2.VideoCapture(path)
 
@@ -163,7 +163,7 @@ class DroneRecognizer:
             out.write(images[i])
         out.release()
 
-    def test(self, im_path="./test_images/drones_easy/", viz=True):
+    def test(self, im_path="./test_images/drones/videos/input/pi_test/", viz=True):
         times = []
         self.last_size = None
         images_visualized = []
