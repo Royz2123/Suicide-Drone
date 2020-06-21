@@ -102,7 +102,7 @@ class KalmanPredictor(object):
         self.prev_t = t[0]
         print(self.f.x)
         print(self.prev_t)
-        out_dt = 0.01
+        out_dt = 0.05
         out_N = 10
         out_states = []
         for i in range(1, len(t)):
@@ -115,7 +115,7 @@ class KalmanPredictor(object):
         # #     out_states.append(f.x)
         # out_states = np.vstack(out_states).T
         print('Starting prediction')
-        out = self.predict_forward(5, 0.1)
+        out = self.predict_forward(out_dt*out_N, out_dt)
         # return {'x': list(out_states[0, :]), 'y': list(out_states[1, :]),
         #         't': list(np.arange(t[-1] + out_dt, t[-1] + (out_N + 1)*out_dt, out_dt))}
         return {'x': [x[0] for x in out], 'y': [x[1] for x in out],
