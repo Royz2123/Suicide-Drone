@@ -20,7 +20,7 @@ class DroneRecognizer:
     def train(self, im_path="./train_images/drones"):
         pass
 
-    def test(self, im_path="./test_images/drones/images/input/", viz=True):
+    def test(self, im_path="./test_images/drones/images/input/", viz=True, edge=True):
         img_paths = [im_path + path for path in os.listdir(im_path)][:10]
         print("TESTING ON:\t\t", img_paths)
 
@@ -28,6 +28,20 @@ class DroneRecognizer:
         times = []
         last_size = None
         for img in imgs:
+            if edge:
+                v = np.median(img)
+                sigma = 1.0
+
+                lower = int(max(0, (1.0 - sigma) * v))
+                upper = int(min(255, (1.0 + sigma) * v))
+                img = cv2.Canny(img, lower, upper)
+
+                kernel = np.ones((2, 2), np.uint8)
+                img = cv2.dilate(img, kernel, iterations=1)
+
+
+
+
             tick = time.time()
             if last_size is None:
                 drones = self._drone_cascade.detectMultiScale(

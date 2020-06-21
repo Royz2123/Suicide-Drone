@@ -116,8 +116,10 @@ class DroneDataset:
 
             count += 1
 
-    def dilute_directory(self, dir_path=None):
-        if dir_path is None:
+    def dilute_directory(self, augment=True):
+        if augment:
+            dir_path = self._augmented_dir
+        else:
             dir_path = self._cropped_dir
 
         for index, filename in enumerate(os.listdir(dir_path)):
@@ -139,7 +141,7 @@ class DroneDataset:
                     print("All files should be mp4 files %s is not, Toar stop being an idiot" % filename)
 
     # assumes train_images/drones/ exists, and create an identical edge dataset
-    def create_edge_dataset(self):
+    def create_edge_dataset(self, augmented=True):
         edges_directory = self._base + "edges\\"
         edges_p = edges_directory + "p\\"
         edges_n = edges_directory + "n\\"
@@ -148,7 +150,10 @@ class DroneDataset:
         create_dir(edges_p)
         create_dir(edges_n)
 
-        self.edgify(self._cropped_dir, edges_p)
+        if augmented:
+            self.edgify(self._augmented_dir, edges_p)
+        else:
+            self.edgify(self._cropped_dir, edges_p)
         self.edgify(self._seperated_dir, edges_n)
 
     def edgify(self, input_dir, output_dir):
@@ -163,16 +168,17 @@ class DroneDataset:
             upper = int(min(255, (1.0 + sigma) * v))
             img = cv2.Canny(img, lower, upper)
 
-            cv2.imshow("test", img)
-            cv2.waitKey(0)
-
             kernel = np.ones((2, 2), np.uint8)
             img = cv2.dilate(img, kernel, iterations=1)
 
             # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
 
-            cv2.imshow("test", img)
+            # cv2.imshow("test", img)
+            # cv2.waitKey(0)
+
+            print(f"Edgifying image {path}")
             cv2.imwrite(output_dir + path, img)
+            print("")
 
     # Augmentation functions
 

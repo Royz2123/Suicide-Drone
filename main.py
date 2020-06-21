@@ -12,12 +12,12 @@ WATCH_XML = "./train_images/watches/classifier/cascade.xml"
 
 def create_dataset():
     dataset = dataset_tools.DroneDataset()
-    # dataset.create_edge_dataset()
     dataset.dilute_directory()
+    dataset.create_edge_dataset()
 
 def detect():
     recog_obj = recognizer.DroneRecognizer()
-    recog_obj.test()
+    recog_obj.test(edge=True)
 
 
 def predict():
@@ -31,4 +31,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    predict()
+    detect()
