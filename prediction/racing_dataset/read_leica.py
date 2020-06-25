@@ -23,7 +23,7 @@ import numpy as np
 import re
 import time
 
-from generalized_time import GeneralizedTime
+from .generalized_time import GeneralizedTime
 import matplotlib.pyplot as plt
 
 
@@ -69,7 +69,7 @@ def parseTextFile(path):
     return t, np.array([x, y, z])
 
     
-t, pos = parseTextFile("./data/leica (4).txt")
+# t, pos = parseTextFile("./data/leica (4).txt")
 
-plt.scatter(pos[0], pos[1])
-plt.show()
+# plt.scatter(pos[0], pos[1])
+# plt.show()
